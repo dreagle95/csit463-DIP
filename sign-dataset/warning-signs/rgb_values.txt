@@ -1,0 +1,10 @@
+yellow warning signs rgb value
+{r:219;g:171;b:12}
+{r:228;g:184;b:35}
+{r:220;g:172;b:59}
+{r:215;g:177;b:30}
+{r:225;g:178;b:26}
+bounds: lower
+{r:205;g:165;b:5}
+bounds: upper
+{r:240;g:190;b:68}
