@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-image = cv2.imread("example3.png")
+image = cv2.imread("example.png")
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 hsv[:, 0, :] = cv2.equalizeHist(hsv[:, 0, :])
 
@@ -50,23 +50,36 @@ for colors in hsv_color_pairs:
     copy = image.copy()
     # print(len(contours))
 
+    signs = []
     for i, cnt in enumerate(contours):
         area = cv2.contourArea(cnt)
-        print(area)
+        #print(area)
 
         if int(area) > 0:
             epsilon = 0.00000001 * cv2.arcLength(cnt, True)
             approx = cv2.approxPolyDP(cnt, epsilon, True)
-            cv2.drawContours(copy, [approx], -1, (255, 0, 0), 3)
+            cv2.drawContours(image, [approx], -1, (255, 0, 0), 3)
 
-            if area > 175:
+            if area > 175 and area < 2200:
                 x, y, w, h = cv2.boundingRect(cnt)
                 cv2.rectangle(copy, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                potential_signs.append(np.array([x, y, w, h]))
+                #potential_signs.append(np.array([x, y, w, h]))
+                potential_signs.append(copy[y:(y+h+20), x:(x+w+20)])
+                #print("x "+str(x+w))
+               # print("w "+str(w))
+               # print("y " +str(y+h))
+                #print(copy.shape)
 
-    cv2.imshow("turd", copy)
+    cv2.imshow("potential_signs", copy)
+    cv2.waitKey(0)
+    #cv2.imshow("Signs", potential_signs[0])
+    for i in range(0,len(potential_signs)):
+        cv2.imshow("potential_signs", potential_signs[i])
+        cv2.waitKey(0)
+        print(potential_signs[i].shape)
+        print(len(potential_signs))
     cv2.waitKey(0)
 
-print(len(potential_signs))
+#print(len(potential_signs))
 # regions of interest? Can we do that with photos or is that only for videos?
 # now we need to get these boxes into an image to pass to the CNN
