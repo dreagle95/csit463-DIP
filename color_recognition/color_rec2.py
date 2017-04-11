@@ -23,12 +23,6 @@ hsv_color_pairs = (
 
 potential_signs = []
 
-# mask = np.zeros((len(image), len(image[0])), dtype=np.uint8)
-# temp_mask = cv2.inRange(hsv, np.array([16, 100, 1]), np.array([26, 255, 255]))
-# mask += temp_mask
-# temp_mask = cv2.inRange(hsv, np.array([0, 75, 0]), np.array([9, 255, 255]))
-# mask += temp_mask
-
 for colors in hsv_color_pairs:
     mask = cv2.inRange(hsv, colors[0], colors[1])
     out = cv2.bitwise_and(image, image, mask=mask)
@@ -66,8 +60,8 @@ for colors in hsv_color_pairs:
                 #potential_signs.append(np.array([x, y, w, h]))
                 potential_signs.append(copy[y:(y+h+20), x:(x+w+20)])
                 #print("x "+str(x+w))
-               # print("w "+str(w))
-               # print("y " +str(y+h))
+                #print("w "+str(w))
+                #print("y " +str(y+h))
                 #print(copy.shape)
 
     cv2.imshow("potential_signs", copy)
