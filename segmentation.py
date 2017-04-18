@@ -18,7 +18,6 @@ def normalize(potentials):
     return norm_ims
 
 def segment_sign(im):
-
     hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
     # dark_yellow = np.uint8([[[5, 65, 75]]])

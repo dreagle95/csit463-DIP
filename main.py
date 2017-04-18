@@ -18,7 +18,7 @@ def main():
     warning_path = os.path.join(images_path, 'warning-signs')
 
     # add 40 images, 10 from each sign, into the array
-    for i in range(1, 50):
+    for i in range(1, 44):
         # ims.append(cv2.imread(join(speed_path, os.listdir(speed_path)[i])))
         # ims.append(cv2.imread(join(stop_path, os.listdir(stop_path)[i])))
         # ims.append(cv2.imread(join(yield_path, os.listdir(yield_path)[i])))
