@@ -4,48 +4,93 @@ import numpy as np
 import scipy as pi
 
 
+def normalize(potentials):
+    norm_ims = []
+    dim = (16, 16)
+
+    for sign in potentials:
+        print(sign.shape)
+        resized = cv2.resize(sign, dim)
+        # hsv = cv2.cvtColor(sign, cv2.COLOR_BGR2HSV)
+        # hsv[:, 0, :] = cv2.equalizeHist(hsv[:, 0, :])
+        # resized = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+        norm_ims.append(resized)
+    return norm_ims
+
 def segment_sign(im):
-    # list of boundaries
-    lower_warning = np.array([51, 93.3, 29.4], dtype="uint8")
-    upper_warning = np.array([43, 71.7, 94.3], dtype="uint8")
-    lower_stop = np.array([0, 100, 19.2], dtype="uint8")
-    upper_stop = np.array([359, 78, 100], dtype="uint8")
 
-    boundaries = [
-        # Yellow boundaries for warning signs
-        ([5, 65, 75], [68, 190, 240]),
-        # red boundaries for stop signs
-        ([0,0,29], [60,56,255])
-    ]
+    hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
 
-    # hsv = cv2.cvtColor(im, cv2.COLOR_BGR2HSV)
-    # find colors within the specified boundaries
-    # and apply the mask
-    mask = np.zeros((len(im), len(im[0])), dtype=np.uint8)
-    for (upper, lower) in boundaries:
-        lower = np.array(lower, dtype="uint8")
-        upper = np.array(upper, dtype="uint8")
-        temp_mask = cv2.inRange(im, lower, upper)
-        mask = mask + temp_mask
-        print(mask.shape, temp_mask.shape)
+    # dark_yellow = np.uint8([[[5, 65, 75]]])
+    # hsv_dyellow = cv2.cvtColor(dark_yellow, cv2.COLOR_BGR2HSV)
+    # light_yellow = np.uint8([[[68, 190, 240]]])
+    # hsv_lyellow = cv2.cvtColor(light_yellow, cv2.COLOR_BGR2HSV)
+    # dark_red = np.uint8([[[0, 0, 29]]])
+    # light_red = np.uint8([[[60, 56, 255]]])
+    # hsv_dred = cv2.cvtColor(dark_red, cv2.COLOR_BGR2HSV)
+    # hsv_lred = cv2.cvtColor(light_red, cv2.COLOR_BGR2HSV)
+    # print(hsv_dred, hsv_lred, hsv_lyellow, hsv_dyellow)
 
-    output = cv2.bitwise_and(im, im, mask=mask)
-    imgray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-    # cv2.imshow("imgray", imgray)
-    ret, thresh = cv2.threshold(imgray, 20, 255, 0)
+    hsv[:,:,1] = cv2.equalizeHist(hsv[:,:,1])
+    im = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-    # show the images
-    cv2.imshow("images", np.hstack([im, output]))
-    # cv2.imshow("thresh", thresh)
-    cv2.waitKey(0)
-    _, contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    print(len(contours))
+    hsv_color_pairs = (
+        (np.array([15, 200, 50]), np.array([30, 255, 255])),
+        #(np.array([0, 75, 75]), np.array([7, 255, 255]))
+    )
 
-    cv2.drawContours(im, contours, -1, (255, 0, 0), 3)
-    cv2.imshow("image", im)
-    cv2.waitKey(0)
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        cv2.rectangle(im, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv2.imshow("turd", im)
-    cv2.waitKey(0)
+    potential_signs = []
+
+    for colors in hsv_color_pairs:
+        mask = cv2.inRange(hsv, colors[0], colors[1])
+        out = cv2.bitwise_and(im, im, mask=mask)
+        blur = cv2.blur(out, (5, 5), 0)
+        imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
+        ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
+
+        cv2.imshow("images", np.hstack([im, out]))
+        cv2.imshow("thresh", thresh)
+        cv2.imshow("out", out)
+        cv2.imshow("blur", blur)
+        cv2.waitKey(0)
+
+        heir, contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # cv2.imshow("image", image)
+        # cv2.waitKey(0)
+
+        copy = im.copy()
+        # print(len(contours))
+
+        signs = []
+        for i, cnt in enumerate(contours):
+            area = cv2.contourArea(cnt)
+            # print(area)
+
+            if int(area) > 0:
+                epsilon = 0.000000001 * cv2.arcLength(cnt, True)
+                approx = cv2.approxPolyDP(cnt, epsilon, True)
+                cv2.drawContours(im, [approx], -1, (255, 0, 0), 3)
+
+                if area > 100 and area < 2500:
+                    x, y, w, h = cv2.boundingRect(cnt)
+                    cv2.rectangle(copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                    # potential_signs.append(np.array([x, y, w, h]))
+                    potential_signs.append(copy[y:(y + h + 20), x:(x + w + 20)])
+
+        cv2.imshow("potential_signs", copy)
+        cv2.waitKey(0)
+        # # cv2.imshow("Signs", potential_signs[0])
+        # for i in range(0,len(potential_signs)):
+        #     cv2.imshow("potential_signs", potential_signs[i])
+        #     cv2.waitKey(0)
+        #     print(potential_signs[i].shape)
+        #     print(len(potential_signs))
+        # cv2.waitKey(0)
+
+    # print(len(potential_signs))
+    # regions of interest? Can we do that with photos or is that only for videos?
+    # now we need to get these boxes into an image to pass to the CNN
+
+    # potential_signs = normalize(potential_signs)
+    return potential_signs
