@@ -90,3 +90,6 @@ ENV/
 
 # jetbrains configs
 .idea/*
+
+# "junk" repository
+color_recognition/*
