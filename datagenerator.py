@@ -8,10 +8,11 @@ datagen = ImageDataGenerator(
     height_shift_range=0.2,
     shear_range=0.2,
     zoom_range=0.2,
-    horizontal_flip=True,
+    horizontal_flip=False,
     fill_mode='nearest'
 )
-warn_path = os.path.join(os.getcwd(), 'stopClassification')
+
+warn_path = os.path.join(os.getcwd(), 'warnClassification')
 
 for image in os.listdir(warn_path):
     img = load_img(os.path.join(warn_path, image))

@@ -1,7 +1,10 @@
-from keras.models import Sequential
+import numpy as np
+from sklearn.utils import shuffle
 
-fname = "64-soft-20-CNN.hdf5"
+l1 = np.zeros(10)
+l2 = np.ones(10)
 
-model = Sequential()
-model.load_weights(fname)
+print(l1, l2, end="\n")
 
+l3 = np.append(l1, l2)
+print(l3)
