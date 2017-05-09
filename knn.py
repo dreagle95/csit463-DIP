@@ -44,7 +44,7 @@ def compare_images(imageA, imageB):
 
     # show the images
     plt.show()
-def knn(pot_sign):
+def  knn(pot_sign):
     # load the images
      stop_path = os.path.join(home_path, 'stopClassification2')
      warn_path = os.path.join(home_path, 'warnClassification2')

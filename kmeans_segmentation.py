@@ -1,6 +1,11 @@
 import cv2
 import numpy as np
 
+"""
+    Source referenced: 
+        http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_ml/py_kmeans/py_kmeans_opencv/py_kmeans_opencv.html
+"""
+
 def kMeansSegmentation(images):
     return_signs = []
     for im in images:
@@ -56,11 +61,14 @@ def kMeansSegmentation(images):
         hsv = cv2.cvtColor(copy, cv2.COLOR_BGR2HSV)
 
         hsv_colors = {
-            "yellow": ((np.array([20, 90, 90]), np.array([30, 255, 255]))),
+            "yellow": ((np.array([20, 175, 90]), np.array([30, 255, 255]))),
             "red": ((np.array([0, 140, 0]), np.array([8, 255, 255])),
                     (np.array([145, 150, 0]), np.array([180, 255, 255])))
         }
 
+        """
+            Iterating over each color and applying their corresponding masks
+        """
         for key, colors in hsv_colors.items():
             if key == "red":
                 mask0 = cv2.inRange(hsv, colors[0][0], colors[0][1])
@@ -73,22 +81,31 @@ def kMeansSegmentation(images):
             blur = cv2.blur(output, (21, 21), 0)
             imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
             ret, thresh = cv2.threshold(imgray, 0, 255, cv2.THRESH_OTSU)
+            # cv2.imshow("res2", res2)
             # cv2.imshow("output", output)
             # cv2.imshow("thresh", thresh)
             # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
             _, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+            """
+                Iterating over the contours
+            """
             for cnt in contours:
                 area = cv2.contourArea(cnt)
                 sign = None
+                """
+                    Ignoring anything over 0
+                """
                 if int(area) > 0:
                     epsilon = 0.0000000000000000000000001 * cv2.arcLength(cnt, True)
                     approx = cv2.approxPolyDP(cnt, epsilon, True)
                     #print (approx)
                     #cv2.drawContours(res2, [approx], -1, (255, 0, 0), 2)
 
+                    """
+                        Ignoring anything under 150
+                    """
                     if area > 150:
                         x, y, w, h = cv2.boundingRect(cnt)
                         cv2.rectangle(copy, (x, y), (x + w, y + h), (0, 255, 0), 2)
@@ -97,6 +114,9 @@ def kMeansSegmentation(images):
                         # cv2.waitKey(0)
                         # cv2.destroyAllWindows()
 
+                        """
+                            Only appends to the list if there is an actual image
+                        """
                         if sign is not None:
                             return_signs.append(sign)
 

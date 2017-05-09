@@ -66,6 +66,9 @@ def segment_sign(image):
 
 
     potential_signs1 = []
+    """
+        This step is used to iterate over the colors and apply different masks based on the colors.
+    """
     for key, colors in hsv_colors.items():
         if key == "red":
             mask0 = cv2.inRange(hsv, colors[0][0], colors[0][1])
@@ -74,6 +77,9 @@ def segment_sign(image):
         else:
             mask = cv2.inRange(hsv, colors[0], colors[1])
 
+        """
+            Some pre-processing steps to get better results
+        """
         out = cv2.bitwise_and(im, im, mask=mask)
         blur = cv2.blur(out, (5, 5), 0)
         imgray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
@@ -90,28 +96,38 @@ def segment_sign(image):
 
         copy = im.copy()
         # print(len(contours))
+        """
+            Iterating over the contours
+        """
         for cnt in contours:
             area = cv2.contourArea(cnt)
             # print(area)
 
+            """
+                Ignoring any contour that doesn't have an area over 0
+            """
             if int(area) > 0:
                 epsilon = 0.000000000000000001* cv2.arcLength(cnt, True)
                 approx = cv2.approxPolyDP(cnt, epsilon, True)
-                cv2.drawContours(copy, [approx], -1, (255, 0, 0), 3)
+                #cv2.drawContours(copy, [approx], -1, (255, 0, 0), 3)
 
-                if int(area) > 150:
+                """
+                    Ignoring anything less than 175
+                """
+                if int(area) > 175:
                     x, y, w, h = cv2.boundingRect(cnt)
                     x -= 10
                     y -= 10
                     if x < 0: x = 0
                     if y < 0: y = 0
-                    # cv2.rectangle(copy, (x, y), (x + w+20, y + h+20), (0, 255, 0), 2)
+                    cv2.rectangle(im, (x, y), (x + w+20, y + h+20), (0, 255, 0), 2)
                     # cv2.imshow("copy", copy)
                     # cv2.waitKey(0)
                     # cv2.destroyAllWindows()
                     # potential_signs.append(np.array([x, y, w, h]))
                     potential_signs1.append(image[y:(y + h + 20), x:(x + w + 20)])
-    #
+    cv2.imshow("copy", im)
+    cv2.waitKey(0)
     # for i in potential_signs1:
     #     cv2.imshow("a;lskdfj", i)
     #     cv2.waitKey(0)

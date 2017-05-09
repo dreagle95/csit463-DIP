@@ -3,6 +3,13 @@ import os
 import numpy as np
 from random import randint
 
+"""
+    This script was used to narrow down the classification script.  Basically we ran this over the directories
+    that were already classified to get a more zoomed in image.
+    
+    Source referenced: K-means
+        http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_ml/py_kmeans/py_kmeans_opencv/py_kmeans_opencv.html
+"""
 home_path = os.getcwd()
 images_path = os.path.join(home_path, 'warnClassification')
 

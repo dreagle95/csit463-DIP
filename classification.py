@@ -2,6 +2,12 @@ import cv2
 import os
 import numpy as np
 
+"""
+    This was a one-time script that we ran to seperate the signs into different directories
+    in respect to their classification.  Used for making templates in template matching so we could just average
+    images based on a directory.
+"""
+
 home_path = os.getcwd()
 images_path = os.path.join(home_path, 'good-data')
 
@@ -23,7 +29,7 @@ for i in os.listdir(images_path):
 
 potential_signs = []
 for image in images:
-    #run segmentation code
+    # run segmentation code
     image = brighten(image)
 
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)

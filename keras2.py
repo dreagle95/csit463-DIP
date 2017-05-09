@@ -4,19 +4,20 @@ from numpy import ndarray
 import os
 from os.path import join
 from keras.models import Sequential
-from keras.layers.core import Dense, Dropout, Activation, Flatten
-from keras.layers.convolutional import Convolution2D, MaxPooling2D
-from keras.optimizers import SGD,RMSprop,adam
-from keras.utils import np_utils
+from keras.layers.core import Dense
 from sklearn.utils import shuffle
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from sklearn.preprocessing import LabelEncoder
-from sklearn.pipeline import Pipeline
 
+
+"""
+    This is the actual model used to predict classes of the traffic signs
+    This is the model which uses the HOG descriptor on a DNN,
+    which increased performance from 50% to around 80% (testing)
+    Much of this is pulled and altered from kerasNN.py in the application root folder
+"""
+
+# global variables to pass to the normalize function
 ncols=64
 nrows=64
-
 
 def normalize(im):
     dim = (ncols, nrows)
@@ -24,13 +25,13 @@ def normalize(im):
     return resized
 
 
+# this function takes the images from out data-set and calculates the HOG descriptor
+# for each image and save that descriptor into
 def create_sign_set():
     hog = cv2.HOGDescriptor()
     warn_path = os.path.join(os.getcwd(), 'warnClassification')
     stop_path = os.path.join(os.getcwd(), 'stopClassification')
     false_path = os.path.join(os.getcwd(), 'falsePositives')
-
-    warn_size, stop_size, false_size = 0,0,0
 
     warn_features = np.array([np.array(hog.computeGradient(
         normalize(cv2.imread(join(warn_path, im))))).flatten() for im in os.listdir(warn_path)])
@@ -42,12 +43,6 @@ def create_sign_set():
         normalize(cv2.imread(join(false_path, im))))).flatten() for im in os.listdir(false_path)])
 
     print(warn_features.shape, stop_features.shape, false_features.shape)
-
-    # warn_labels = np.zeros(len(warn_features))
-    # # print("warn label size: ", len(warn_labels))
-    # stop_labels = np.ones(len(stop_features))
-    # # print("stop label size: ", len(stop_labels))
-    # labels = np.append(warn_labels, stop_labels)
 
     labels = np.zeros(((len(stop_features)+len(warn_features)+len(false_features)),3))
     for i, label in enumerate(labels):
@@ -72,7 +67,6 @@ def split_sign_dataset():
 
     data, labels = shuffle(features, labels, random_state=2)
     whole_data = [data, labels]
-    # print("whole data: ",len(whole_data))
 
     test_size = int(0.10*len(data))
     print("test_size:",test_size)
@@ -86,8 +80,8 @@ def split_sign_dataset():
     return train, l_train, test, l_test, whole_data
 
 train, l_train, test, l_test, whole_data = split_sign_dataset()
-# train, test = train.astype('float32'), test.astype('float32')
-#
+train, test = train.astype('float32'), test.astype('float32')
+
 epochs = 100
 l_rate = 0.025
 decay = l_rate/epochs
@@ -106,6 +100,8 @@ model.compile(loss='categorical_crossentropy', optimizer='adadelta',
 
 hist = model.fit(train, l_train, batch_size=32,
                  verbose=1, nb_epoch=epochs, validation_data=(test, l_test))
+
+
 
 first_predict = model.predict_classes(whole_data[0][-10:])
 score1 = model.evaluate(test, l_test, verbose=0)

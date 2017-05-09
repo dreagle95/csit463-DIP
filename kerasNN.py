@@ -100,7 +100,6 @@ train, test = train.astype('float32'), test.astype('float32')
 print("train len outside:",len(train))
 
 model = Sequential()
-
 model.add(Convolution2D(32, 3, 3,
                         border_mode='valid',
                         input_shape=(ncols, nrows, 3)))
@@ -143,30 +142,25 @@ model.compile(loss='sparse_categorical_crossentropy', decay=decay,
 fname = "64-soft-20-CNN2.hdf5"
 model.load_weights(fname)
 
-# n_test, n_label = whole_data[0][-10:], whole_data[1][-10:]
-#
-# warn_path = os.path.join(os.getcwd(), 'warnClassification2')
-# stop_path = os.path.join(os.getcwd(), 'stopClassification2')
-#
-# warn_features = np.array([np.array(
-#         normalize(cv2.imread(join(warn_path, im)))) for im in os.listdir(warn_path)])
-# stop_features = np.array([np.array(
-#         normalize(cv2.imread(join(stop_path, im)))) for im in os.listdir(stop_path)])
-# warn_labels = np.zeros(len(warn_features))
-# # print("warn label size: ", len(warn_labels))
-# stop_labels = np.ones(len(stop_features))
-# # print("stop label size: ", len(stop_labels))
-# labels = np.append(warn_labels, stop_labels)
-#
-# features = np.append(warn_features, stop_features,axis=0)
-# print("features shape: ", features.shape)
-#
-# data, labels = shuffle(features, labels, random_state=2)
-stop1 = cv2.imread(os.path.join(os.getcwd(), "stop1.jpg"))
-stop2 = cv2.imread(os.path.join(os.getcwd(), "stop2.jpg"))
+n_test, n_label = whole_data[0][-10:], whole_data[1][-10:]
 
-features = np.array([np.array(normalize(im)) for im in [stop1, stop2]])
-labels = [1.0,1.0]
+warn_path = os.path.join(os.getcwd(), 'warnClassification2')
+stop_path = os.path.join(os.getcwd(), 'stopClassification2')
+
+warn_features = np.array([np.array(
+        normalize(cv2.imread(join(warn_path, im)))) for im in os.listdir(warn_path)])
+stop_features = np.array([np.array(
+        normalize(cv2.imread(join(stop_path, im)))) for im in os.listdir(stop_path)])
+warn_labels = np.zeros(len(warn_features))
+# print("warn label size: ", len(warn_labels))
+stop_labels = np.ones(len(stop_features))
+# print("stop label size: ", len(stop_labels))
+labels = np.append(warn_labels, stop_labels)
+
+features = np.append(warn_features, stop_features,axis=0)
+print("features shape: ", features.shape)
+
+
 predictions = model.predict_classes(features)
 
 for i, prediction in enumerate(predictions):
